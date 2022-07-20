@@ -81,7 +81,7 @@ func (c *Client) logf(format string, args ...interface{}) {
 // Pass in a nil response object to skip response parsing.
 // If the request fails or the server returns an error, the first error
 // will be returned.
-func (c *Client) Run(ctx context.Context, req *Request, resp interface{}) error {
+func (c *Client) Run(ctx context.Context, req *Request, resp, ext interface{}) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -93,10 +93,10 @@ func (c *Client) Run(ctx context.Context, req *Request, resp interface{}) error 
 	if c.useMultipartForm {
 		return c.runWithPostFields(ctx, req, resp)
 	}
-	return c.runWithJSON(ctx, req, resp)
+	return c.runWithJSON(ctx, req, resp, ext)
 }
 
-func (c *Client) runWithJSON(ctx context.Context, req *Request, resp interface{}) error {
+func (c *Client) runWithJSON(ctx context.Context, req *Request, resp, ext interface{}) error {
 	var requestBody bytes.Buffer
 	requestBodyObj := struct {
 		Query     string                 `json:"query"`
@@ -111,7 +111,8 @@ func (c *Client) runWithJSON(ctx context.Context, req *Request, resp interface{}
 	c.logf(">> variables: %v", req.vars)
 	c.logf(">> query: %s", req.q)
 	gr := &graphResponse{
-		Data: resp,
+		Data:       resp,
+		Extensions: ext,
 	}
 	r, err := http.NewRequest(http.MethodPost, c.endpoint, &requestBody)
 	if err != nil {
