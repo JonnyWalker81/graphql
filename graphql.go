@@ -259,8 +259,9 @@ func (e graphErr) Error() string {
 }
 
 type graphResponse struct {
-	Data   interface{}
-	Errors []graphErr
+	Data       interface{}
+	Extensions interface{}
+	Errors     []graphErr
 }
 
 // Request is a GraphQL request.
